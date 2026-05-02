@@ -25,14 +25,14 @@ th{background:rgba(56,189,248,0.05);color:var(--shield)}
 <body>
 
 <div class="status-bar">
-    <span>System: <b id="sysStat">Online</b></span>
+    <span>System: <b id="sysStat" style="color:var(--win)">LIVE</b></span>
     <span class="mode-tag" id="modeTag">SHIELD MODE</span>
 </div>
 
 <div class="card">
     <div style="font-size:12px;color:#94a3b8">CURRENT PREDICTION</div>
-    <div id="sig" class="blink" style="color:#94a3b8;font-size:24px">SCANNING MARKET...</div>
-    <div id="reason" style="font-size:13px;color:var(--shield);margin-top:5px">Safety Protocol Active</div>
+    <div id="sig" class="blink" style="color:#94a3b8;font-size:24px">CONNECTING...</div>
+    <div id="reason" style="font-size:13px;color:var(--shield);margin-top:5px">Initializing AI Engine</div>
     
     <div class="stats-box">
         <div class="stat">Level<br><b id="lvl" style="color:var(--acc)">L1</b></div>
@@ -50,89 +50,53 @@ th{background:rgba(56,189,248,0.05);color:var(--shield)}
 
 <script>
 (async function(){
-    const API = 'https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?t=';
+    // Proxy added to bypass CORS blocking
+    const PROXY = 'https://api.allorigins.win/raw?url=';
+    const API = encodeURIComponent('https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?t=');
     let s = { lp: null, streak: 0, active: null, skip: 0 };
 
     function getEliteLogic(h) {
-        // 1. Safety Skip (Violet or Error)
         if(s.skip > 0) { s.skip--; return { sig: 'WAIT', r: 'Safety Cooling...', risk: 'MID', m: 'RECOVERY' }; }
-        
         const last = h[0], prev = h[1], p2 = h[2];
         const lastS = last >= 5 ? 'BIG' : 'SMALL';
         const prevS = prev >= 5 ? 'BIG' : 'SMALL';
         const p2S = p2 >= 5 ? 'BIG' : 'SMALL';
 
-        // 2. Violet Trap Protection
-        if(last === 0 || last === 5) {
-            s.skip = 2; // Next 2 rounds skip for safety
-            return { sig: 'WAIT', r: 'Violet Detected: Pause', risk: 'HIGH', m: 'SHIELD' };
-        }
-
-        // 3. Dragon Rider Mode (Round 4+)
-        if(lastS === prevS && prevS === p2S) {
-            return { sig: lastS, r: 'Dragon Riding: Follow', risk: 'LOW', m: 'DRAGON' };
-        }
-
-        // 4. ZigZag Sniper (B-S-B-S Reversal)
-        if(lastS !== prevS && prevS !== p2S) {
-            return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'ZigZag Reversal', risk: 'MID', m: 'SHIELD' };
-        }
-
-        // 5. Momentum Break
-        if(lastS === prevS && lastS !== p2S) {
-            return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'Trend Break Point', risk: 'LOW', m: 'SHIELD' };
-        }
-
-        return { sig: 'WAIT', r: 'No Clear Setup', risk: 'LOW', m: 'SCANNING' };
+        if(last === 0 || last === 5) { s.skip = 1; return { sig: 'WAIT', r: 'Violet Safety Pause', risk: 'HIGH', m: 'SHIELD' }; }
+        if(lastS === prevS && prevS === p2S) { return { sig: lastS, r: 'Dragon Pattern', risk: 'LOW', m: 'DRAGON' }; }
+        if(lastS !== prevS && prevS !== p2S) { return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'ZigZag Detected', risk: 'MID', m: 'SHIELD' }; }
+        return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'Counter Trend', risk: 'LOW', m: 'SHIELD' };
     }
 
     async function tick() {
         try {
-            const r = await fetch(API + Date.now());
+            const r = await fetch(PROXY + API + Date.now());
             const j = await r.json();
             const list = j.data.list;
             const h = list.map(x => parseInt(x.number));
             const p = list[0].issueNumber;
 
             if (p !== s.lp) {
-                // Process Results
                 if(s.active && s.active !== 'WAIT') {
                     const win = s.active === (h[0] >= 5 ? 'BIG' : 'SMALL');
-                    if(win) { s.streak = 0; } else { s.streak++; s.skip = 1; }
-                    
                     const row = `<tr><td>${p.toString().slice(-4)}</td><td>${h[0]}</td><td>${h[0]>=5?'B':'S'}</td><td class="${win?'W':'L'}">${win?'WIN':'LOSS'}</td></tr>`;
                     document.getElementById('logBody').insertAdjacentHTML('afterbegin', row);
+                    if(!win) s.streak++; else s.streak = 0;
                 }
-
-                // New Logic Execution
                 const d = getEliteLogic(h);
                 const el = document.getElementById('sig');
-                const mTag = document.getElementById('modeTag');
-                
-                if(d.sig === 'WAIT') {
-                    el.textContent = 'WAITING...';
-                    el.className = 'signal blink';
-                    el.style.color = '#94a3b8';
-                    el.style.fontSize = '24px';
-                } else {
-                    el.textContent = d.sig;
-                    el.className = 'signal';
-                    el.style.fontSize = '40px';
-                    el.style.color = (d.m === 'DRAGON') ? 'var(--dragon)' : 'var(--acc)';
-                }
-
-                mTag.textContent = d.m + ' MODE';
-                mTag.style.color = (d.m === 'DRAGON') ? 'var(--dragon)' : 'var(--shield)';
-                
+                el.textContent = d.sig === 'WAIT' ? 'WAITING...' : d.sig;
+                el.className = 'signal' + (d.sig === 'WAIT' ? ' blink' : '');
+                el.style.color = d.sig === 'WAIT' ? '#94a3b8' : (d.m === 'DRAGON' ? 'var(--dragon)' : 'var(--acc)');
                 document.getElementById('reason').textContent = d.r;
                 document.getElementById('risk').textContent = d.risk;
                 document.getElementById('lvl').textContent = 'L' + (s.streak + 1);
-                
+                document.getElementById('modeTag').textContent = d.m + ' MODE';
                 s.active = d.sig; s.lp = p;
             }
-        } catch(e) { console.log("Fetch Error"); }
+        } catch(e) { document.getElementById('sig').textContent = "FETCHING..."; }
     }
-    setInterval(tick, 2000); tick();
+    setInterval(tick, 3000); tick();
 })();
 </script>
 </body>
