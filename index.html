@@ -1,132 +1,148 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>AI OMNI-SNIPER | 30S ELITE</title>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI OMNI-SAFE V10 | RECOVERY</title>
 <style>
-:root{--bg:#020617;--fg:#f1f5f9;--acc:#fbbf24;--win:#10b981;--loss:#ef4444;--card:#0f172a;--shield:#38bdf8;--dragon:#ff4d4d}
-body{background:var(--bg);color:var(--fg);font-family:sans-serif;padding:10px;margin:0;overflow-x:hidden}
-.card{background:var(--card);border:2px solid var(--shield);border-radius:15px;padding:15px;text-align:center;box-shadow:0 0 20px rgba(56,189,248,0.15);margin-bottom:10px}
-.signal{font-size:45px;font-weight:900;margin:10px 0;letter-spacing:2px;text-transform:uppercase}
-.status-bar{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
-.mode-tag{padding:4px 8px;border-radius:4px;background:rgba(56,189,248,0.1);color:var(--shield);font-weight:bold}
-.stats-box{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.stat{background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;font-size:12px}
-.log-container{max-height:300px;overflow-y:auto;background:var(--card);border-radius:10px;border:1px solid #1e293b;margin-top:10px}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th,td{padding:12px;border-bottom:1px solid #1e293b;text-align:center}
-th{background:rgba(56,189,248,0.05);color:var(--shield)}
-.W{color:var(--win);font-weight:bold} .L{color:var(--loss);font-weight:bold}
-.blink{animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+:root{--bg:#020617;--fg:#f1f5f9;--acc:#fbbf24;--win:#10b981;--loss:#ef4444;--card:#0f172a;--shield:#38bdf8;--wait:#94a3b8}
+body{background:var(--bg);color:var(--fg);font-family:sans-serif;padding:10px;margin:0;display:flex;flex-direction:column;align-items:center}
+.card{width:100%;max-width:380px;background:var(--card);border:2px solid var(--shield);border-radius:20px;padding:20px;text-align:center;box-shadow:0 0 30px rgba(56,189,248,0.15)}
+.signal{font-size:55px;font-weight:900;margin:10px 0;letter-spacing:5px}
+.status-bar{width:100%;max-width:380px;display:flex;justify-content:space-between;font-size:11px;margin-bottom:10px;color:var(--wait);font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}
+.stat{background:rgba(255,255,255,0.05);padding:10px;border-radius:12px;font-size:12px}
+.recovery-chart{width:100%;max-width:380px;margin-top:15px;background:#1e1b4b;padding:10px;border-radius:10px;font-size:11px;border:1px dashed var(--acc)}
+.log-box{width:100%;max-width:380px;margin-top:20px;background:var(--card);border-radius:15px;overflow:hidden;border:1px solid #1e293b}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td{padding:10px;text-align:center;border-bottom:1px solid #1e293b}
+.blink{animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 </style>
 </head>
 <body>
 
 <div class="status-bar">
-    <span>System: <b id="sysStat" style="color:var(--loss)">OFFLINE</b></span>
-    <span class="mode-tag" id="modeTag">SCANNING</span>
+    <span>SYNC: WinGo 1M</span>
+    <span id="pStatus" style="color:var(--loss)">○ INITIALIZING...</span>
 </div>
 
 <div class="card">
-    <div style="font-size:12px;color:#94a3b8">30S NEXT PREDICTION</div>
-    <div id="sig" class="blink" style="color:#94a3b8;font-size:24px">CONNECTING...</div>
-    <div id="reason" style="font-size:13px;color:var(--shield);margin-top:5px">Linking to Game Server</div>
+    <div id="sig" class="blink" style="color:var(--wait);font-size:24px">WAITING...</div>
+    <div id="reason" style="font-size:12px;color:var(--shield);margin-top:8px">Analyzing Trend Stability</div>
     
-    <div class="stats-box">
-        <div class="stat">Level<br><b id="lvl" style="color:var(--acc)">L1</b></div>
-        <div class="stat">Risk<br><b id="risk">LOW</b></div>
-        <div class="stat">Accuracy<br><b style="color:var(--win)">95.8%</b></div>
+    <div class="stats">
+        <div class="stat">Next Bet<br><b id="lvl" style="color:var(--acc)">₹10</b></div>
+        <div class="stat">Mode<br><b id="patt" style="color:var(--win)">SAFE</b></div>
+        <div class="stat">System<br><b>V10-PRO</b></div>
     </div>
 </div>
 
-<div class="log-container">
+<div class="recovery-chart">
+    <b style="color:var(--acc)">RECOVERY PLAN:</b> ₹10 → ₹30 → ₹90 → ₹270<br>
+    <small>Stop if L3 fails. Wait 15 mins for market reset.</small>
+</div>
+
+<div class="log-box">
     <table>
-        <thead><tr><th>Period</th><th>Num</th><th>Size</th><th>Result</th></tr></thead>
-        <tbody id="logBody"></tbody>
+        <tbody id="logs"></tbody>
     </table>
+    <button onclick="location.reload();" style="width:100%;padding:15px;background:var(--shield);border:none;color:var(--bg);font-weight:bold;cursor:pointer">RE-CONNECT SYSTEM</button>
 </div>
 
 <script>
-(async function(){
-    // Multi-Proxy for High Stability
-    const PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
-    const API_URL = 'https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?t=';
+(function(){
+    const API = 'https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?t=';
+    const PROXIES = [
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?',
+        'https://api.codetabs.com/v1/proxy?quest='
+    ];
     
-    let state = { lp: null, streak: 0, activeSig: null, skip: 0 };
+    let state = { lp:null, streak:0, active:null, skip:0, pIdx:0 };
 
-    function calculatePrediction(history) {
-        if(state.skip > 0) { state.skip--; return { sig: 'WAIT', r: 'Safety Cool-down', risk: 'MID', m: 'SHIELD' }; }
+    async function syncData() {
+        for(let i=0; i<PROXIES.length; i++) {
+            try {
+                const res = await fetch(PROXIES[state.pIdx] + encodeURIComponent(API + Date.now()));
+                const data = await res.json();
+                if(data && data.data) {
+                    document.getElementById('pStatus').textContent = '● SECURE CONNECTION';
+                    document.getElementById('pStatus').style.color = 'var(--win)';
+                    return data;
+                }
+            } catch(e) { state.pIdx = (state.pIdx + 1) % PROXIES.length; }
+        }
+        return null;
+    }
+
+    function calculateLogic(h) {
+        // 1. RECOVERY STOP (Loss Protection)
+        if(state.streak >= 3) {
+            state.skip = 10; 
+            state.streak = 0;
+            return { s:'STOP', r:'L3 Fail: Market Unstable. Take 10m Break' };
+        }
         
-        const last = history[0], prev = history[1], p2 = history[2];
-        const lastS = last >= 5 ? 'BIG' : 'SMALL';
-        const prevS = prev >= 5 ? 'BIG' : 'SMALL';
-        const p2S = p2 >= 5 ? 'BIG' : 'SMALL';
+        if(state.skip > 0) { state.skip--; return { s:'WAIT', r:'System Cooling Down...' }; }
+        
+        // 2. VIOLET & DRAGON SHIELD
+        if(h[0] === 0 || h[0] === 5) { state.skip = 2; return { s:'WAIT', r:'Violet Reset Detected' }; }
+        
+        const sizes = h.slice(0, 10).map(x => x >= 5 ? 'B' : 'S');
+        let dragon = 1;
+        for(let i=1; i<sizes.length; i++){ if(sizes[i] === sizes[0]) dragon++; else break; }
+        
+        if(dragon >= 4) return { s:'WAIT', r:'Dragon Pattern: High Risk' };
 
-        // Violet Protection
-        if(last === 0 || last === 5) {
-            state.skip = 1;
-            return { sig: 'WAIT', r: 'Violet Detected', risk: 'HIGH', m: 'SHIELD' };
+        // 3. SEQUENCE SNIPER
+        // ZigZag Reversal Logic
+        if(sizes[0] !== sizes[1] && sizes[1] !== sizes[2]) {
+            return { s: sizes[0]==='B'?'SMALL':'BIG', r:'ZigZag Reversal Entry' };
         }
 
-        // Dragon Logic
-        if(lastS === prevS && prevS === p2S) {
-            return { sig: lastS, r: 'Dragon Strength', risk: 'LOW', m: 'DRAGON' };
-        }
+        // Ratio Saturation
+        const bigs = h.slice(0, 12).filter(x => x >= 5).length;
+        if(bigs >= 9) return { s:'SMALL', r:'Ratio: Small Overdue' };
+        if(bigs <= 3) return { s:'BIG', r:'Ratio: Big Overdue' };
 
-        // Standard Reversal Logic
-        return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'Trend Reversal', risk: 'MID', m: 'SHIELD' };
+        return { s:'WAIT', r:'Scanning High-Prob Setup' };
     }
 
     async function update() {
-        try {
-            const response = await fetch(PROXY + encodeURIComponent(API_URL + Date.now()));
-            const json = await response.json();
-            
-            if (!json.data || !json.data.list) return;
+        const data = await syncData();
+        if(!data) {
+            document.getElementById('sig').textContent = 'OFFLINE';
+            document.getElementById('pStatus').textContent = '○ SEARCHING NODE';
+            document.getElementById('pStatus').style.color = 'var(--loss)';
+            return;
+        }
 
-            const list = json.data.list;
-            const h = list.map(x => parseInt(x.number));
-            const currentPeriod = list[0].issueNumber;
+        const list = data.data.list;
+        const h = list.map(x => parseInt(x.number));
+        const curr = list[0].issueNumber;
 
-            if (currentPeriod !== state.lp) {
-                document.getElementById('sysStat').textContent = "ONLINE";
-                document.getElementById('sysStat').style.color = "var(--win)";
-
-                // Update Result Log
-                if(state.activeSig && state.activeSig !== 'WAIT') {
-                    const win = state.activeSig === (h[0] >= 5 ? 'BIG' : 'SMALL');
-                    const row = `<tr><td>${currentPeriod.toString().slice(-4)}</td><td>${h[0]}</td><td>${h[0]>=5?'B':'S'}</td><td class="${win?'W':'L'}">${win?'WIN':'LOSS'}</td></tr>`;
-                    document.getElementById('logBody').insertAdjacentHTML('afterbegin', row);
-                    state.streak = win ? 0 : state.streak + 1;
-                }
-
-                // Get New Prediction
-                const data = calculatePrediction(h);
-                const sigEl = document.getElementById('sig');
-                
-                sigEl.textContent = data.sig === 'WAIT' ? 'WAITING...' : data.sig;
-                sigEl.className = 'signal' + (data.sig === 'WAIT' ? ' blink' : '');
-                sigEl.style.fontSize = data.sig === 'WAIT' ? '24px' : '45px';
-                sigEl.style.color = data.m === 'DRAGON' ? 'var(--dragon)' : 'var(--acc)';
-                
-                document.getElementById('reason').textContent = data.r;
-                document.getElementById('risk').textContent = data.risk;
-                document.getElementById('lvl').textContent = 'L' + (state.streak + 1);
-                document.getElementById('modeTag').textContent = data.m + ' MODE';
-                
-                state.activeSig = data.sig;
-                state.lp = currentPeriod;
+        if (curr !== state.lp) {
+            if(state.active && state.active !== 'WAIT' && state.active !== 'STOP') {
+                const win = state.active === (h[0] >= 5 ? 'BIG' : 'SMALL');
+                const row = `<tr><td>${curr.toString().slice(-4)}</td><td>${h[0]}</td><td>${h[0]>=5?'B':'S'}</td><td style="color:${win?'var(--win)':'var(--loss)'}">${win?'WIN':'LOSS'}</td></tr>`;
+                document.getElementById('logs').insertAdjacentHTML('afterbegin', row);
+                state.streak = win ? 0 : state.streak + 1;
             }
-        } catch(e) {
-            document.getElementById('sysStat').textContent = "RECONNECTING...";
-            document.getElementById('sysStat').style.color = "var(--loss)";
+
+            const res = calculateLogic(h);
+            const sigEl = document.getElementById('sig');
+            sigEl.textContent = res.s === 'WAIT' ? 'WAITING...' : res.s;
+            sigEl.style.fontSize = res.s === 'WAIT' ? '24px' : '55px';
+            sigEl.style.color = res.s === 'WAIT' ? 'var(--wait)' : (res.s === 'STOP' ? 'var(--loss)' : 'var(--acc)');
+            sigEl.className = 'signal' + (res.s === 'WAIT' ? ' blink' : '');
+            
+            document.getElementById('reason').textContent = res.r;
+            document.getElementById('lvl').textContent = '₹' + (state.streak === 0 ? 10 : (state.streak === 1 ? 30 : 90));
+            
+            state.active = res.s; state.lp = curr;
         }
     }
-
-    setInterval(update, 2500); // Check every 2.5 seconds for 30s game
-    update();
+    setInterval(update, 4000); update();
 })();
 </script>
 </body>
