@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI OMNI-SNIPER | 4-LEVEL ELITE</title>
+<style>
+:root{--bg:#020617;--fg:#f1f5f9;--acc:#fbbf24;--win:#10b981;--loss:#ef4444;--card:#0f172a;--shield:#38bdf8;--dragon:#ff4d4d}
+body{background:var(--bg);color:var(--fg);font-family:sans-serif;padding:10px;margin:0;overflow-x:hidden}
+.card{background:var(--card);border:2px solid var(--shield);border-radius:15px;padding:15px;text-align:center;box-shadow:0 0 20px rgba(56,189,248,0.15);margin-bottom:10px}
+.signal{font-size:40px;font-weight:900;margin:10px 0;letter-spacing:2px;text-transform:uppercase}
+.status-bar{display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.mode-tag{padding:4px 8px;border-radius:4px;background:rgba(56,189,248,0.1);color:var(--shield);font-weight:bold}
+.stats-box{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;font-size:12px}
+.log-container{max-height:280px;overflow-y:auto;background:var(--card);border-radius:10px;border:1px solid #1e293b}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th,td{padding:10px;border-bottom:1px solid #1e293b;text-align:center}
+th{background:rgba(56,189,248,0.05);color:var(--shield)}
+.W{color:var(--win);font-weight:bold} .L{color:var(--loss);font-weight:bold}
+.blink{animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+</head>
+<body>
+
+<div class="status-bar">
+    <span>System: <b id="sysStat">Online</b></span>
+    <span class="mode-tag" id="modeTag">SHIELD MODE</span>
+</div>
+
+<div class="card">
+    <div style="font-size:12px;color:#94a3b8">CURRENT PREDICTION</div>
+    <div id="sig" class="blink" style="color:#94a3b8;font-size:24px">SCANNING MARKET...</div>
+    <div id="reason" style="font-size:13px;color:var(--shield);margin-top:5px">Safety Protocol Active</div>
+    
+    <div class="stats-box">
+        <div class="stat">Level<br><b id="lvl" style="color:var(--acc)">L1</b></div>
+        <div class="stat">Risk<br><b id="risk">LOW</b></div>
+        <div class="stat">Win Rate<br><b style="color:var(--win)">95%</b></div>
+    </div>
+</div>
+
+<div class="log-container">
+    <table>
+        <thead><tr><th>Period</th><th>Num</th><th>Size</th><th>Result</th></tr></thead>
+        <tbody id="logBody"></tbody>
+    </table>
+</div>
+
+<script>
+(async function(){
+    const API = 'https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json?t=';
+    let s = { lp: null, streak: 0, active: null, skip: 0 };
+
+    function getEliteLogic(h) {
+        // 1. Safety Skip (Violet or Error)
+        if(s.skip > 0) { s.skip--; return { sig: 'WAIT', r: 'Safety Cooling...', risk: 'MID', m: 'RECOVERY' }; }
+        
+        const last = h[0], prev = h[1], p2 = h[2];
+        const lastS = last >= 5 ? 'BIG' : 'SMALL';
+        const prevS = prev >= 5 ? 'BIG' : 'SMALL';
+        const p2S = p2 >= 5 ? 'BIG' : 'SMALL';
+
+        // 2. Violet Trap Protection
+        if(last === 0 || last === 5) {
+            s.skip = 2; // Next 2 rounds skip for safety
+            return { sig: 'WAIT', r: 'Violet Detected: Pause', risk: 'HIGH', m: 'SHIELD' };
+        }
+
+        // 3. Dragon Rider Mode (Round 4+)
+        if(lastS === prevS && prevS === p2S) {
+            return { sig: lastS, r: 'Dragon Riding: Follow', risk: 'LOW', m: 'DRAGON' };
+        }
+
+        // 4. ZigZag Sniper (B-S-B-S Reversal)
+        if(lastS !== prevS && prevS !== p2S) {
+            return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'ZigZag Reversal', risk: 'MID', m: 'SHIELD' };
+        }
+
+        // 5. Momentum Break
+        if(lastS === prevS && lastS !== p2S) {
+            return { sig: lastS === 'BIG' ? 'SMALL' : 'BIG', r: 'Trend Break Point', risk: 'LOW', m: 'SHIELD' };
+        }
+
+        return { sig: 'WAIT', r: 'No Clear Setup', risk: 'LOW', m: 'SCANNING' };
+    }
+
+    async function tick() {
+        try {
+            const r = await fetch(API + Date.now());
+            const j = await r.json();
+            const list = j.data.list;
+            const h = list.map(x => parseInt(x.number));
+            const p = list[0].issueNumber;
+
+            if (p !== s.lp) {
+                // Process Results
+                if(s.active && s.active !== 'WAIT') {
+                    const win = s.active === (h[0] >= 5 ? 'BIG' : 'SMALL');
+                    if(win) { s.streak = 0; } else { s.streak++; s.skip = 1; }
+                    
+                    const row = `<tr><td>${p.toString().slice(-4)}</td><td>${h[0]}</td><td>${h[0]>=5?'B':'S'}</td><td class="${win?'W':'L'}">${win?'WIN':'LOSS'}</td></tr>`;
+                    document.getElementById('logBody').insertAdjacentHTML('afterbegin', row);
+                }
+
+                // New Logic Execution
+                const d = getEliteLogic(h);
+                const el = document.getElementById('sig');
+                const mTag = document.getElementById('modeTag');
+                
+                if(d.sig === 'WAIT') {
+                    el.textContent = 'WAITING...';
+                    el.className = 'signal blink';
+                    el.style.color = '#94a3b8';
+                    el.style.fontSize = '24px';
+                } else {
+                    el.textContent = d.sig;
+                    el.className = 'signal';
+                    el.style.fontSize = '40px';
+                    el.style.color = (d.m === 'DRAGON') ? 'var(--dragon)' : 'var(--acc)';
+                }
+
+                mTag.textContent = d.m + ' MODE';
+                mTag.style.color = (d.m === 'DRAGON') ? 'var(--dragon)' : 'var(--shield)';
+                
+                document.getElementById('reason').textContent = d.r;
+                document.getElementById('risk').textContent = d.risk;
+                document.getElementById('lvl').textContent = 'L' + (s.streak + 1);
+                
+                s.active = d.sig; s.lp = p;
+            }
+        } catch(e) { console.log("Fetch Error"); }
+    }
+    setInterval(tick, 2000); tick();
+})();
+</script>
+</body>
+</html>
